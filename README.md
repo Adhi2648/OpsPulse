@@ -1,78 +1,72 @@
 # OpsPulse Analytics Platform
 
-**Operations Intelligence Platform**  
-Built Dec 2025 - Jan 2026 | Python, SQL, Tableau, PostgreSQL, FastAPI, Airflow
+OpsPulse is an operations intelligence portfolio project built with Python, SQL, PostgreSQL, FastAPI, Airflow, and Tableau. The platform is designed to ingest 500K+ workflow records, validate and clean them, compute operational KPIs, detect exceptions, refresh data daily, and expose results through APIs and dashboards.
 
-## Overview
-Built an operations intelligence platform using Python, SQL, PostgreSQL, and Tableau, transforming 500K+ workflow records into executive dashboards that reduced manual reporting time by 70% across weekly KPI reviews.
+This repository is being built iteratively. The current milestone includes:
 
-Engineered FastAPI services and Airflow pipelines to validate, enrich, and refresh analytics datasets daily, improving data quality by 35% and enabling faster root-cause analysis for high-priority operational exceptions.
+- production-style folder structure
+- `pyproject.toml`
+- Dockerized local infrastructure
+- PostgreSQL warehouse schema
+- synthetic data generator for 500K workflow records
 
-## Features
-- FastAPI REST API for data ingestion, validation, enrichment
-- PostgreSQL backend with optimized schemas and analytics views
-- Airflow DAG for daily ETL pipeline
-- KPI calculations and exception detection
-- Sample dashboard (React + Chart.js or Tableau)
-- Synthetic dataset generator simulating 500K+ records
+## Current Structure
 
-## Tech Stack
-- **Backend**: FastAPI, SQLAlchemy, PostgreSQL
-- **Orchestration**: Apache Airflow
-- **Analytics**: Pandas, SQL
-- **Dashboard**: React/Chart.js (demo) or Tableau
-- **Data**: 500K+ workflow records (synthetic)
+```text
+opspulse/
+├── config/
+├── dags/
+├── data/
+├── docs/
+├── logs/
+├── scripts/
+│   └── generate_workflow_data.py
+├── sql/
+│   ├── init/
+│   │   ├── 001_create_schemas.sql
+│   │   └── 002_create_tables.sql
+│   └── marts/
+│       └── 001_reporting_views.sql
+├── src/
+│   └── opspulse/
+│       ├── api/
+│       ├── core/
+│       ├── db/
+│       ├── etl/
+│       └── models/
+├── tests/
+├── .env.example
+├── docker-compose.yml
+└── pyproject.toml
+```
 
 ## Quick Start
 
-### 1. Install dependencies
-```bash
-cd opspulse
-pip install -r requirements.txt
-```
+### 1. Copy environment variables
 
-### 2. Environment
 ```bash
 cp .env.example .env
-# Edit .env with your PostgreSQL credentials
 ```
 
-### 3. Start services
-- PostgreSQL + Airflow (Docker recommended - see docker-compose.yml)
-- `uvicorn main:app --reload --port 8000`
+### 2. Start PostgreSQL and Airflow
 
-### 4. Run demo
 ```bash
-python -m main seed-data
-python -m main run-etl
+docker compose up -d postgres airflow-init airflow-scheduler airflow-webserver
 ```
 
-## API Endpoints
-- `POST /api/ingest` - Load workflow records
-- `POST /api/validate` - Data quality checks
-- `POST /api/enrich` - Add derived metrics
-- `GET /api/kpis` - Executive KPIs
-- `GET /api/exceptions` - High-priority issues
+### 3. Generate synthetic source data
 
-## KPIs Achieved
-- **70% reduction** in manual reporting time
-- **35% improvement** in data quality score
-- Daily refreshed dashboards
-
-## Project Structure
-```
-opspulse/
-├── main.py                 # FastAPI application
-├── models.py               # SQLAlchemy models
-├── schemas.py              # Pydantic models
-├── database.py             # DB connection
-├── etl.py                  # ETL pipeline
-├── dags/
-│   └── ops_pulse_etl.py    # Airflow DAG
-├── frontend/               # Dashboard
-├── sample_data.csv
-├── README.md
-└── requirements.txt
+```bash
+python scripts/generate_workflow_data.py --records 500000
 ```
 
-See individual files for implementation details.
+Generated files are written under `data/raw/`.
+
+## Warehouse Layout
+
+- `raw`: immutable landing tables for source workflow events
+- `staging`: validated and standardized workflow records
+- `warehouse`: fact and dimension tables for analytics
+- `marts`: KPI summaries and reporting views
+
+See `docs/architecture.md` for the system design and `sql/init/` for the database schema.
