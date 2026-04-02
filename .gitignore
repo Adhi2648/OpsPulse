@@ -6,5 +6,7 @@ __pycache__/
 *.pyc
 data/raw/*.csv
 data/raw/*.json
+data/diagnostics/*.csv
+data/diagnostics/*.json
 logs/*
 !logs/.gitkeep

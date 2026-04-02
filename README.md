@@ -9,6 +9,9 @@ This repository is being built iteratively. The current milestone includes:
 - Dockerized local infrastructure
 - PostgreSQL warehouse schema
 - synthetic data generator for 500K workflow records
+- local ETL pipeline modules
+- validation and quarantine handling
+- initial pytest coverage for validation and transform logic
 
 ## Current Structure
 
@@ -48,19 +51,38 @@ opspulse/
 cp .env.example .env
 ```
 
-### 2. Start PostgreSQL and Airflow
+### 2. Install the package for local module execution
+
+```bash
+python -m pip install -e .
+```
+
+### 3. Start PostgreSQL and Airflow
 
 ```bash
 docker compose up -d postgres airflow-init airflow-scheduler airflow-webserver
 ```
 
-### 3. Generate synthetic source data
+### 4. Generate synthetic source data
 
 ```bash
 python scripts/generate_workflow_data.py --records 500000
 ```
 
 Generated files are written under `data/raw/`.
+
+### 5. Run ETL locally
+
+```bash
+python -m opspulse.etl.pipeline --input data/raw/workflow_events.csv --dry-run
+python -m opspulse.etl.pipeline --input data/raw/workflow_events.csv
+```
+
+### 6. Run tests
+
+```bash
+python -m pytest tests
+```
 
 ## Warehouse Layout
 
