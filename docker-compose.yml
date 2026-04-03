@@ -48,6 +48,26 @@ services:
       - postgres_data:/var/lib/postgresql/data
       - ./sql/init:/docker-entrypoint-initdb.d
 
+  api:
+    build:
+      context: .
+      dockerfile: docker/api/Dockerfile
+    container_name: opspulse-api
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      POSTGRES_HOST: postgres
+      RAW_DATA_DIR: /app/data/raw
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./src:/app/src
+      - ./data:/app/data
+    depends_on:
+      postgres:
+        condition: service_healthy
+
   airflow-init:
     <<: *airflow-common
     container_name: opspulse-airflow-init

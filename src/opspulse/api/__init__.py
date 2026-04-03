@@ -1,1 +1,1 @@
-"""API package for future FastAPI routes."""
+"""FastAPI package for OpsPulse analytics endpoints."""

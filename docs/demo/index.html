@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OpsPulse Demo Dashboard</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 24px;
+      background: #f6f8fb;
+      color: #1f2937;
+    }
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+    }
+    h1, h2 {
+      margin-top: 0;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+    }
+    th, td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid #e5e7eb;
+      font-size: 14px;
+    }
+    .muted {
+      color: #6b7280;
+      font-size: 14px;
+    }
+    .section {
+      margin-bottom: 24px;
+    }
+    .error {
+      color: #b91c1c;
+      background: #fee2e2;
+      padding: 12px;
+      border-radius: 8px;
+    }
+    code {
+      background: #eef2ff;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>OpsPulse Analytics Platform</h1>
+    <p class="muted">Minimal recruiter demo for KPI summary, daily KPI rows, and open exceptions.</p>
+
+    <div id="error" class="error" style="display:none;"></div>
+
+    <div class="grid" id="summary-grid"></div>
+
+    <div class="section">
+      <h2>Daily KPI Snapshot</h2>
+      <table id="kpi-table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Team</th>
+            <th>Workflow Type</th>
+            <th>Total</th>
+            <th>Completed</th>
+            <th>Backlog</th>
+            <th>Exceptions</th>
+            <th>Quality</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <div class="section">
+      <h2>Open Exceptions</h2>
+      <table id="exceptions-table">
+        <thead>
+          <tr>
+            <th>Workflow</th>
+            <th>Date</th>
+            <th>Team</th>
+            <th>Priority</th>
+            <th>Exception</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <p class="muted">API base URL: <code>http://localhost:8000</code>. Serve this file locally, for example with <code>python -m http.server 9000</code>.</p>
+  </div>
+
+  <script>
+    const apiBase = "http://localhost:8000";
+
+    function showError(message) {
+      const error = document.getElementById("error");
+      error.style.display = "block";
+      error.textContent = message;
+    }
+
+    function renderSummary(summary) {
+      const entries = [
+        ["Total Workflows", summary.total_workflows],
+        ["Completed", summary.completed_workflows],
+        ["Backlog", summary.backlog_workflows],
+        ["Exceptions", summary.exception_workflows],
+        ["SLA Breaches", summary.sla_breach_count],
+        ["Avg Processing (min)", Number(summary.avg_processing_minutes).toFixed(1)],
+        ["Avg Age (hours)", Number(summary.avg_age_hours).toFixed(1)],
+        ["Quality Score", Number(summary.data_quality_score).toFixed(1)],
+      ];
+
+      const grid = document.getElementById("summary-grid");
+      grid.innerHTML = entries.map(([label, value]) => `
+        <div class="card">
+          <div class="muted">${label}</div>
+          <div style="font-size: 28px; font-weight: 700; margin-top: 8px;">${value}</div>
+        </div>
+      `).join("");
+    }
+
+    function renderTable(tableId, items, columns) {
+      const tbody = document.querySelector(`#${tableId} tbody`);
+      tbody.innerHTML = items.map(item => `
+        <tr>
+          ${columns.map(column => `<td>${item[column] ?? ""}</td>`).join("")}
+        </tr>
+      `).join("");
+    }
+
+    async function loadDashboard() {
+      try {
+        const [summaryResponse, dailyResponse, exceptionResponse] = await Promise.all([
+          fetch(`${apiBase}/api/kpis/summary`),
+          fetch(`${apiBase}/api/kpis/daily?page_size=10`),
+          fetch(`${apiBase}/api/exceptions?page_size=10`),
+        ]);
+
+        if (!summaryResponse.ok || !dailyResponse.ok || !exceptionResponse.ok) {
+          throw new Error("Could not load one or more API resources. Start the API and run ETL first.");
+        }
+
+        const summary = await summaryResponse.json();
+        const daily = await dailyResponse.json();
+        const exceptions = await exceptionResponse.json();
+
+        renderSummary(summary);
+        renderTable("kpi-table", daily.items, [
+          "calendar_date",
+          "team_name",
+          "workflow_type",
+          "total_workflows",
+          "completed_workflows",
+          "backlog_workflows",
+          "exception_workflows",
+          "data_quality_score",
+        ]);
+        renderTable("exceptions-table", exceptions.items, [
+          "workflow_id",
+          "detected_date",
+          "team_name",
+          "priority_name",
+          "exception_type",
+          "status_name",
+        ]);
+      } catch (error) {
+        showError(error.message);
+      }
+    }
+
+    loadDashboard();
+  </script>
+</body>
+</html>
