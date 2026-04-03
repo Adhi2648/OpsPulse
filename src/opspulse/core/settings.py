@@ -20,12 +20,14 @@ class Settings(BaseSettings):
     postgres_port: int = Field(default=5432, alias="POSTGRES_PORT")
     postgres_db: str = Field(default="opspulse", alias="POSTGRES_DB")
     postgres_user: str = Field(default="opspulse", alias="POSTGRES_USER")
-    postgres_password: str = Field(default="opspulse", alias="POSTGRES_PASSWORD")
+    postgres_password: str = Field(default="", alias="POSTGRES_PASSWORD")
     raw_data_dir: Path = Field(default=Path("data/raw"), alias="RAW_DATA_DIR")
     log_level: str = Field(default="INFO", alias="LOG_LEVEL")
 
     @property
     def database_url(self) -> str:
+        if not self.postgres_password:
+            raise ValueError("POSTGRES_PASSWORD must be set before running database-backed ETL.")
         return (
             "postgresql+psycopg://"
             f"{self.postgres_user}:{self.postgres_password}"

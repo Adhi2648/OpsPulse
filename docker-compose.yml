@@ -1,7 +1,9 @@
 name: opspulse
 
 x-airflow-common: &airflow-common
-  image: apache/airflow:2.10.2
+  build:
+    context: .
+    dockerfile: docker/airflow/Dockerfile
   env_file:
     - .env
   environment:
@@ -10,6 +12,9 @@ x-airflow-common: &airflow-common
     AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: "true"
     AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${AIRFLOW_DB}
     AIRFLOW__CORE__FERNET_KEY: ${AIRFLOW_FERNET_KEY}
+    PYTHONPATH: /opt/airflow/src
+    POSTGRES_HOST: postgres
+    RAW_DATA_DIR: /opt/airflow/data/raw
     AIRFLOW_UID: 50000
   volumes:
     - ./dags:/opt/airflow/dags
