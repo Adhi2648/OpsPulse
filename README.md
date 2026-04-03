@@ -1,6 +1,6 @@
 # OpsPulse Analytics Platform
 
-OpsPulse is a portfolio-ready operations intelligence platform built with Python, SQL, PostgreSQL, FastAPI, Airflow, and a lightweight static demo dashboard. It ingests large workflow datasets, validates and quarantines bad records, loads a warehouse with raw, staging, fact, dimension, and mart layers, exposes analytics through APIs, and orchestrates daily refreshes through Airflow.
+OpsPulse is an intelligence platform built with Python, SQL, PostgreSQL, FastAPI, Airflow, and a lightweight static demo dashboard. It ingests large workflow datasets, validates and quarantines bad records, loads a warehouse with raw, staging, fact, dimension, and mart layers, exposes analytics through APIs, and orchestrates daily refreshes through Airflow.
 
 This repo is meant to be runnable end-to-end by a recruiter or interviewer:
 
