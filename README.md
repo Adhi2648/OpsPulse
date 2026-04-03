@@ -2,15 +2,6 @@
 
 OpsPulse is an intelligence platform built with Python, SQL, PostgreSQL, FastAPI, Airflow, and a lightweight static demo dashboard. It ingests large workflow datasets, validates and quarantines bad records, loads a warehouse with raw, staging, fact, dimension, and mart layers, exposes analytics through APIs, and orchestrates daily refreshes through Airflow.
 
-This repo is meant to be runnable end-to-end by a recruiter or interviewer:
-
-1. start Docker services
-2. generate synthetic workflow data
-3. run ETL locally or via Airflow
-4. query the API
-5. inspect warehouse tables and marts
-6. open the lightweight demo dashboard
-
 ## Project Overview
 
 OpsPulse demonstrates:
@@ -353,18 +344,3 @@ It displays:
 - KPI summary
 - daily KPI table
 - open exceptions
-
-## Limitations
-
-- Tableau is represented by warehouse marts and API/demo outputs, not a committed Tableau workbook
-- Airflow metadata and warehouse tables share one PostgreSQL database for local development
-- API tests validate HTTP contract and not full warehouse-backed API integration
-- Integration tests require a reachable local PostgreSQL instance and configured credentials
-
-## Future Improvements
-
-- add a committed Tableau workbook or screenshots
-- add DAG smoke tests and alerting hooks
-- add auth and rate limiting
-- add richer KPI trend comparisons
-- add a more polished dashboard UI
